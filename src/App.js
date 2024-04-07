@@ -87,7 +87,7 @@ function MainContent() {
         {filteredRecipes.map(recipe => (
           <div key={recipe.idMeal} className="col-md-3" onClick={() => handleSeafoodRecipeSelect(recipe.idMeal)}>
             <div className="card mb-4 shadow-sm">
-              <img src={recipe.strMealThumb} className="card-img-top" alt={recipe.strMeal} />
+              <img src={recipe.strMealThumb} className="card-img-top clickable" alt={recipe.strMeal} />
               <div className="card-body">
                 <h5 className="card-title">{recipe.strMeal}</h5>
               </div>
