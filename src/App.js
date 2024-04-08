@@ -26,45 +26,39 @@ function Header() {
 function MainContent() {
   const [recipes, setRecipes] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [searchInput, setSearchInput] = useState("");
-  const [filteredRecipes, setFilteredRecipes] = useState([]);
+  const [searchInput, setSearchInput] = useState(localStorage.getItem('searchInput') || ""); // So we can store our search input.
+  const [noResults, setNoResults] = useState(false); 
   const navigate = useNavigate();
 
   /**
-   * This handles the click event for checking what recipe to look at.
-   * @param {Takes in the selected sea food recipe} seaFoodRecipe 
+   * This navigates to the seafood recipe page by passing it's id and search input as well.
+   * @param {The seafood recipe id.} seaFoodRecipe 
    */
   const handleSeafoodRecipeSelect = (seaFoodRecipe) => {
     setSelectedRecipe(seaFoodRecipe);
-    navigate(`/recipe/${seaFoodRecipe}`);
+    navigate(`/recipe/${seaFoodRecipe}?search=${searchInput}`);
   }
 
   /**
-  * This makes the search bar functional. 
-  * @param {The event of the search.} e 
-  */
+   * Handles the search inputs based on what the user searches.
+   * @param {The search event.} e 
+   */
   const handleSearchChange = (e) => {
     const inputValue = e.target.value.toLowerCase();
-    console.log("Input Value:", inputValue);
     setSearchInput(inputValue);
+    localStorage.setItem('searchInput', inputValue);
+    setNoResults(false);
 
-    const filtered = recipes.filter((recipe) => {
-      return recipe.strMeal.toLowerCase().includes(inputValue);
-    });
-
-    console.log("Filtered Recipes:", filteredRecipes);
-    setFilteredRecipes(filtered);
   };
   
   /**
-  * A function that is used to make the call request of the api.
-  */
+   * Fetching the API data from TheMealDB.
+   */
   const fetchSeafoodRecipes = async () => {
     try {
       const response = await fetch('https://www.themealdb.com/api/json/v1/1/filter.php?c=Seafood');
       const data = await response.json();
       setRecipes(data.meals || []);
-      setFilteredRecipes(data.meals || []);
     } catch (error) {
       console.error('ERROR:', error);
     } 
@@ -73,17 +67,30 @@ function MainContent() {
   useEffect(() => {
     fetchSeafoodRecipes();
   }, []);
-  
+
+  /**
+   * Filter based on results. 
+   */
+  const filteredRecipes = recipes.filter((recipe) => {
+    return recipe.strMeal.toLowerCase().includes(searchInput);
+  });
+
   return (
     <main>
       <div className="row">
-        <div className="searchBar">
-          <input
-            type="text"
-            placeholder="Search for any seafood recipes"
-            onChange={handleSearchChange}
-            value={searchInput} />
+        <div className="searchBar my-2 d-flex justify-content-center">
+          <div className="input-group" style={{ maxWidth: '300px' }}>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search for any seafood recipes"
+              onChange={handleSearchChange}
+              value={searchInput} />
+          </div>
         </div>
+        {searchInput && filteredRecipes.length === 0 && (
+          <p className="text-center">No results found.</p>
+        )}
         {filteredRecipes.map(recipe => (
           <div key={recipe.idMeal} className="col-md-3" onClick={() => handleSeafoodRecipeSelect(recipe.idMeal)}>
             <div className="card mb-4 shadow-sm">
@@ -96,19 +103,6 @@ function MainContent() {
         ))}
       </div>
     </main>
-  );
-}
-
-/**
- * Footer of the page.
- * @returns The footer.
- */
-function Footer() {
-  return (
-    <footer className="footer mt-auto py-3 bg-light">
-      <div className="container">
-      </div>
-    </footer>
   );
 }
 
