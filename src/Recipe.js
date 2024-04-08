@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 function Recipe() {
   const [recipes, setRecipes] = useState([]);
   const { recipeId } = useParams();
-
+  const { search } = useParams();
   /**
   * A function that is used to make the call request of the api.
   */
